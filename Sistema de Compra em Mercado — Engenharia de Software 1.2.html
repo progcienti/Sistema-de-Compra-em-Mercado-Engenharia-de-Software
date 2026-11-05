@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistema de Compra em Mercado — Engenharia de Software</title>
+<style>
+:root{--bg:#f3f7fe;--card:#fff;--ink:#0b2545;--mut:#4a6285;--pri:#1257c4;--pri2:#0a3d91;--soft:#e3eeff;--line:#c9daf5;--vis:#cfe2ff;--visb:#1257c4;--cur:#ffb020;--ok:#0f8a5f;--bad:#c62f3d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#07142b;--card:#0e2247;--ink:#e8f1ff;--mut:#9db6dc;--pri:#5b9bff;--pri2:#8db8ff;--soft:#14305f;--line:#264a85;--vis:#1b4a9a;--visb:#5b9bff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#07142b;--card:#0e2247;--ink:#e8f1ff;--mut:#9db6dc;--pri:#5b9bff;--pri2:#8db8ff;--soft:#14305f;--line:#264a85;--vis:#1b4a9a;--visb:#5b9bff;color-scheme:dark}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:calc(70px + env(safe-area-inset-top,0px));height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;min-height:100%}
+body:before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--pri2);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--pri2);color:#fff;display:flex;align-items:center;gap:16px;padding:10px 20px}
+header b{white-space:nowrap}
+nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav a{color:#dbe8ff;text-decoration:none;padding:6px 12px;border-radius:20px;white-space:nowrap;font-size:14px}
+nav a:hover,nav a:focus-visible{background:rgba(255,255,255,.18);color:#fff;outline:none}
+section{max-width:1100px;margin:0 auto;padding:56px 20px 8px}
+h1,h2,h3{line-height:1.2;margin:0 0 12px;letter-spacing:-.01em}
+h2{font-size:clamp(26px,4vw,34px);color:var(--pri2)}
+h3{font-size:18px}
+p{margin:0 0 12px;max-width:72ch}
+.hero{background:linear-gradient(135deg,#0a3d91,#1a6fe0);color:#fff;max-width:none;padding:72px 20px 64px}
+.hero div{max-width:1060px;margin:0 auto}
+.hero h1{font-size:clamp(34px,6vw,58px);max-width:18ch}
+.hero p{font-size:18px;color:#dbe8ff}
+.btn,a.btn{display:inline-block;border:0;cursor:pointer;background:var(--pri);color:#fff;font:600 15px inherit;font-family:inherit;padding:11px 22px;border-radius:8px;text-decoration:none;margin:4px 8px 4px 0}
+.btn:hover{filter:brightness(1.1)}.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--cur);outline-offset:2px}
+.btn.alt{background:var(--card);color:var(--pri2);border:2px solid var(--pri)}
+.hero .btn{background:#fff;color:#0a3d91}.hero .btn.alt{background:transparent;color:#fff;border-color:#fff}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.card.top{border-top:5px solid var(--pri)}
+.av{width:56px;height:56px;border-radius:50%;background:var(--soft);color:var(--pri);display:grid;place-items:center;font-size:24px;margin-bottom:10px}
+[contenteditable]{outline:none;border-bottom:1px dashed var(--line)}
+.muted{color:var(--mut);font-size:14px}
+.flowwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+.flowwrap svg{display:block;width:100%;min-width:520px;height:auto}
+.node rect,.node polygon{fill:var(--card);stroke:var(--pri2);stroke-width:2;transition:fill .25s}
+.node text{fill:var(--ink);font:600 12px "Segoe UI",system-ui,sans-serif;text-anchor:middle}
+.node.vis rect,.node.vis polygon{fill:var(--vis);stroke:var(--visb)}
+.node.cur rect,.node.cur polygon{fill:var(--cur);stroke:#b36b00;stroke-width:3.5}
+.node.cur text{fill:#3a2600}
+.edge path,.edge polygon{stroke:var(--pri2);fill:none;stroke-width:2}.edge polygon{fill:var(--pri2)}
+.edge.vis path{stroke:var(--visb);stroke-width:4}.edge.vis polygon{fill:var(--visb);stroke:var(--visb)}
+.edge.cur path{stroke:var(--cur);stroke-width:5}.edge.cur polygon{fill:var(--cur);stroke:var(--cur)}
+.lbl{font:700 11px "Segoe UI",system-ui,sans-serif;fill:var(--pri2);text-anchor:middle}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin:10px 0;color:var(--mut)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:2px solid var(--pri2)}
+.simgrid{display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:18px;align-items:start}
+@media (max-width:880px){.simgrid{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 3px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.panel{background:var(--soft);border:1px solid var(--line);border-left:6px solid var(--cur);border-radius:10px;padding:14px;margin-top:14px}
+.panel p{margin:0 0 8px}.hint{font-size:14px;color:var(--mut)}
+.diag{max-height:82vh;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px}
+.diag svg{display:block;width:100%;min-width:560px;height:auto}
+#log{margin:8px 0 0;padding-left:20px;font-size:13px;max-height:220px;overflow:auto;color:var(--mut)}
+.err{color:var(--bad);font-size:14px;font-weight:600}
+pre{white-space:pre-wrap;background:var(--card);border:1px dashed var(--pri);border-radius:8px;padding:10px;font:13px/1.5 ui-monospace,Consolas,monospace;margin:8px 0 0}
+.fh{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px}.fh h3{margin:0}
+#modal{position:fixed;inset:0;z-index:50;background:rgba(5,15,40,.82);display:none;padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px))}#modal.on{display:flex}
+.mbox{margin:auto;width:100%;height:100%;background:var(--card);border-radius:12px;display:flex;flex-direction:column;overflow:hidden}.mhead{display:flex;gap:6px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}.mhead h3{margin:0;flex:1;min-width:140px}.mbody{flex:1;overflow:auto;padding:12px}.mbody svg{display:block;margin:0 auto;height:auto}
+footer{text-align:center;padding:40px 20px;color:var(--mut);font-size:14px}
+</style>
+</head>
+<body>
+<header><b>🛒 Compra em Mercado</b>
+<nav><a href="#inicio">Início</a><a href="#equipe">Equipe</a><a href="#problema">Situação-problema</a><a href="#funcionalidade">Funcionalidade</a><a href="#fluxogramas">Fluxogramas</a><a href="#simulador">Simulador</a><a href="#conclusao">Conclusão</a></nav></header>
+
+<section id="inicio" class="hero"><div>
+<h1>Sistema de Compra em Mercado</h1>
+<p>Atividade em grupo de Engenharia de Software: modelagem da funcionalidade “Realizar uma compra no supermercado” com três fluxogramas e um simulador que segue as decisões de quem o usa.</p>
+<a class="btn" href="#fluxogramas">Ver fluxogramas</a><a class="btn alt" href="#simulador">Abrir simulador</a>
+</div></section>
+
+<section id="equipe"><h2>Equipe</h2>
+<p class="muted">Clique em um nome ou papel para editar e colocar os dados reais do grupo.</p>
+<div class="grid" id="team"></div></section>
+
+<section id="problema"><h2>Situação-problema</h2>
+<div class="card top"><p>Um supermercado enfrenta dificuldades durante o processo de compra: demora no atendimento, erros na identificação dos produtos, falta de mercadorias no estoque e problemas no pagamento.</p>
+<p>Para melhorar esse processo, propõe-se um sistema de compras que registre os produtos, calcule o valor total, verifique descontos e processe pagamentos de forma organizada.</p></div></section>
+
+<section id="funcionalidade"><h2>Funcionalidade escolhida</h2>
+<p><b>Realizar uma compra no supermercado.</b> O operador registra os produtos escolhidos pelo cliente, o sistema calcula o total, aplica descontos quando disponíveis e finaliza a compra após a confirmação do pagamento.</p>
+<div class="grid">
+<div class="card top"><h3>Fluxo principal</h3><p>Compra realizada com sucesso, do registro dos produtos até a entrega ao cliente.</p></div>
+<div class="card top"><h3>Fluxo alternativo</h3><p>O cliente utiliza um cupom de desconto, que é validado antes do pagamento.</p></div>
+<div class="card top"><h3>Fluxo de exceção</h3><p>Pagamento recusado ou produto indisponível: o cliente tenta de novo ou a compra é cancelada.</p></div>
+</div></section>
+
+<section id="fluxogramas"><h2>Fluxogramas</h2>
+<p>Oval: início e fim. Retângulo: processo. Losango: decisão, com saídas SIM e NÃO.</p>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(330px,1fr))">
+<div><div class="fh"><h3>1. Fluxo principal</h3><span><button class="btn alt" data-x="1">⤢ Expandir</button><button class="btn" data-run="1">▶ Executar</button></span></div><p class="muted">Caminho normal: tudo corre bem e a compra é finalizada.</p><div class="flowwrap" id="f1"></div></div>
+<div><div class="fh"><h3>2. Fluxo alternativo</h3><span><button class="btn alt" data-x="2">⤢ Expandir</button><button class="btn" data-run="2">▶ Executar</button></span></div><p class="muted">O cliente utiliza um cupom de desconto.</p><div class="flowwrap" id="f2"></div></div>
+<div><div class="fh"><h3>3. Fluxo de exceção</h3><span><button class="btn alt" data-x="3">⤢ Expandir</button><button class="btn" data-run="3">▶ Executar</button></span></div><p class="muted">Pagamento recusado ou produto indisponível.</p><div class="flowwrap" id="f3"></div></div>
+</div></section>
+
+<section id="simulador"><h2>Simulador interativo</h2>
+<p>Preencha os dados e inicie. Em cada losango o simulador faz uma pergunta: o caminho segue a sua resposta (SIM ou NÃO), e o sistema mostra a verificação dos dados como apoio.</p>
+<div class="legend"><span><i style="background:var(--cur)"></i>Bloco atual</span><span><i style="background:var(--vis)"></i>Bloco já executado</span><span><i style="background:var(--card)"></i>Ainda não executado</span><span>Seta destacada: caminho percorrido</span></div>
+<div class="simgrid">
+<div>
+<div class="card">
+<label for="flowsel">Fluxograma a executar</label><select id="flowsel"><option value="0">Completo (principal + cupom + exceções)</option><option value="1">1. Fluxo principal</option><option value="2">2. Fluxo alternativo (cupom)</option><option value="3">3. Fluxo de exceção</option></select>
+<label for="nome">Nome do produto</label><input id="nome" value="Arroz 5 kg">
+<div class="two"><div><label for="qtd">Quantidade</label><input id="qtd" type="number" min="1" step="1" value="2"></div>
+<div><label for="preco">Preço unitário (R$)</label><input id="preco" type="number" min="0" step="0.01" value="29.90"></div></div>
+<label for="estoque">Quantidade disponível no estoque</label><input id="estoque" type="number" min="0" step="1" value="10">
+<label for="cupom">Código de cupom (deixe vazio se não houver)</label><input id="cupom" value="DESC10" autocomplete="off">
+<p class="muted" style="margin:4px 0 0">Cupons válidos: DESC10 (10%), PROMO5 (5%), MERCADO20 (20%).</p>
+<div class="two"><div><label for="forma">Forma de pagamento</label><select id="forma"><option>Cartão de crédito</option><option>Cartão de débito</option><option>Pix</option><option>Dinheiro</option></select></div>
+<div><label for="result">Resultado do pagamento</label><select id="result"><option value="aprovado">Aprovado</option><option value="recusado">Recusado</option></select></div></div>
+<p class="muted" style="margin-top:8px">Forma e resultado do pagamento podem ser alterados durante a simulação, por exemplo ao tentar outra forma após uma recusa.</p>
+<div style="margin-top:10px"><button class="btn" id="start">Iniciar compra</button><button class="btn alt" id="reset">Reiniciar</button></div>
+<div class="err" id="err" role="alert"></div>
+</div>
+<div class="panel" id="panel"><p>Preencha os dados e clique em <b>Iniciar compra</b>.</p></div>
+<div class="card" style="margin-top:14px"><h3>Registro da execução</h3><ol id="log"></ol></div>
+</div>
+<div class="diag" id="diag"></div>
+</div></section>
+
+<section id="conclusao"><h2>Conclusão</h2>
+<div class="card top"><p>A modelagem em três fluxogramas deixou claro o caminho normal da compra e os desvios que um sistema real precisa tratar: cupom de desconto, estoque insuficiente e pagamento recusado.</p>
+<p>O simulador mostra que decisões bem definidas (losangos com saídas SIM e NÃO) levam a comportamentos previsíveis e testáveis. Um sistema assim reduz erros de identificação, avisa sobre falta de estoque e torna o pagamento mais organizado, o que ataca os problemas citados na situação-problema.</p></div></section>
+<footer>Atividade em Grupo — Engenharia de Software · Sistema de Compra em Mercado</footer>
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mbox"><div class="mhead"><h3 id="mtitle"></h3><button class="btn alt" id="mzout">− Reduzir</button><button class="btn alt" id="mzin">+ Ampliar</button><button class="btn alt" id="mfit">Ajustar</button><button class="btn" id="mrun">▶ Executar</button><button class="btn" id="mclose">✕ Fechar</button></div><div class="mbody" id="mbody"></div></div></div>
+
+<script>
+/* ===== Equipe ===== */
+(function(){
+    var h = "";
+
+    h += '<div class="card">' +
+         '<div class="av">👤</div>' +
+         '<h3 contenteditable="true" spellcheck="false">João Augusto</h3>' +
+         '<p class="muted" contenteditable="true" spellcheck="false">Desenvolvedor back-end</p>' +
+         '</div>';
+
+    h += '<div class="card">' +
+         '<div class="av">👤</div>' +
+         '<h3 contenteditable="true" spellcheck="false">Jordana Raica</h3>' +
+         '<p class="muted" contenteditable="true" spellcheck="false">Desenvolvedora Front-end e web design</p>' +
+         '</div>';
+
+    document.getElementById("team").innerHTML = h;
+})();
+
+/* ===== Motor de fluxogramas ===== */
+var DIM={o:[130,40],r:[180,50],d:[190,80]};
+function wrap(t,n){var l=[],c="";t.split(" ").forEach(function(w){if((c+" "+w).trim().length>n&&c){l.push(c);c=w}else c=(c+" "+w).trim()});l.push(c);return l}
+function border(n,p){var dx=p[0]-n.x,dy=p[1]-n.y,hw=n.w/2,hh=n.h/2;
+ if(Math.abs(dy)<=hh&&Math.abs(dx)>=hw)return [n.x+(dx<0?-hw:hw),p[1]];
+ return [p[0],n.y+(dy<0?-hh:hh)]}
+function build(el,g,pfx){
+ var N={},E=[],s='<svg viewBox="0 0 '+g.vb[0]+' '+g.vb[1]+'" role="img" aria-label="Fluxograma">';
+ g.n.forEach(function(a){N[a[0]]={id:a[0],t:a[1],l:a[2],x:a[3],y:a[4],w:DIM[a[1]][0],h:DIM[a[1]][1]}});
+ g.e.forEach(function(a){
+  var f=N[a[0]],t=N[a[1]],via=a[3]||[],mid=via.slice();
+  var p0=border(f,via.length?via[0]:[t.x,t.y]),p1=border(t,via.length?via[via.length-1]:[f.x,f.y]);
+  var pts=[p0].concat(mid,[p1]);
+  var q=pts[pts.length-2],e=pts[pts.length-1],dx=Math.sign(e[0]-q[0]),dy=Math.sign(e[1]-q[1]);
+  var tri=dx?[[e[0],e[1]],[e[0]-dx*10,e[1]-5],[e[0]-dx*10,e[1]+5]]:[[e[0],e[1]],[e[0]-5,e[1]-dy*10],[e[0]+5,e[1]-dy*10]];
+  var path=pts.map(function(p,i){return(i?"L":"M")+p[0]+" "+p[1]}).join(" ");
+  var k=a[0]+"-"+a[1],lab="";
+  if(a[2]){var a0=pts[0],a1=pts[1],hx=a1[0]!==a0[0],sx=Math.sign(a1[0]-a0[0]),sy=Math.sign(a1[1]-a0[1]);
+   lab='<text class="lbl" x="'+(hx?a0[0]+sx*24:a0[0]+20)+'" y="'+(hx?a0[1]-7:a0[1]+sy*16)+'">'+a[2]+'</text>'}
+  s+='<g class="edge" id="'+pfx+'e-'+k+'"><path d="'+path+'"/><polygon points="'+tri.join(" ")+'"/>'+lab+'</g>';
+  E.push({f:a[0],t:a[1],k:k,a:a[2]==="SIM"?"s":a[2]==="NÃO"?"n":""})});
+ g.n.forEach(function(a){var n=N[a[0]],sh;
+  if(n.t==="d")sh='<polygon points="'+[[n.x,n.y-40],[n.x+95,n.y],[n.x,n.y+40],[n.x-95,n.y]].join(" ")+'"/>';
+  else sh='<rect x="'+(n.x-n.w/2)+'" y="'+(n.y-n.h/2)+'" width="'+n.w+'" height="'+n.h+'" rx="'+(n.t==="o"?20:6)+'"/>';
+  var ln=wrap(n.l,n.t==="d"?14:24),y0=n.y-(ln.length-1)*7+4;
+  s+='<g class="node" id="'+pfx+'n-'+n.id+'">'+sh+ln.map(function(x,i){return'<text x="'+n.x+'" y="'+(y0+i*14)+'">'+x+'</text>'}).join("")+'</g>'});
+ el.innerHTML=s+"</svg>";return{N:N,E:E}}
+
+/* Fluxo 1 — principal */
+var G1={vb:[560,1030],n:[["s","o","Início",190,30],["a","r","Cliente escolhe os produtos",190,105],["b","r","Operador registra os produtos",190,185],["d1","d","Produtos disponíveis?",190,285],["x","r","Informar produto indisponível",440,285],["c","r","Calcular valor total",190,395],["f","r","Cliente escolhe a forma de pagamento",190,475],["g","r","Processar o pagamento",190,555],["d2","d","Pagamento aprovado?",190,655],["y","r","Informar falha no pagamento",440,655],["h","r","Finalizar compra",190,765],["i","r","Emitir nota ou comprovante",190,840],["j","r","Entregar produtos ao cliente",190,915],["e","o","Fim",190,990]],
+e:[["s","a"],["a","b"],["b","d1"],["d1","c","SIM"],["d1","x","NÃO"],["x","a","",[[440,105]]],["c","f"],["f","g"],["g","d2"],["d2","h","SIM"],["d2","y","NÃO"],["y","f","",[[440,475]]],["h","i"],["i","j"],["j","e"]]};
+/* Fluxo 2 — alternativo (cupom) */
+var G2={vb:[790,1140],n:[["s","o","Início",190,30],["a","r","Cliente escolhe os produtos",190,105],["b","r","Operador registra os produtos",190,180],["c","r","Calcular valor total",190,255],["d1","d","Cliente possui cupom?",190,355],["p3","r","Informar código do cupom",440,355],["d2","d","Cupom válido?",440,465],["p4","r","Aplicar desconto",440,575],["p5","r","Informar cupom inválido",690,465],["k","r","Calcular valor com desconto",190,650],["pg","r","Processar pagamento",190,745],["d3","d","Pagamento aprovado?",190,845],["q","r","Solicitar outra forma de pagamento",440,845],["f","r","Finalizar compra",190,955],["r","r","Emitir comprovante",190,1030],["e","o","Fim",190,1100]],
+e:[["s","a"],["a","b"],["b","c"],["c","d1"],["d1","p3","SIM"],["d1","k","NÃO"],["p3","d2"],["d2","p4","SIM"],["d2","p5","NÃO"],["p4","k","",[[440,638]]],["p5","k","",[[690,662]]],["k","pg"],["pg","d3"],["d3","f","SIM"],["d3","q","NÃO"],["q","pg","",[[440,745]]],["f","r"],["r","e"]]};
+/* Fluxo 3 — exceção */
+var G3={vb:[790,990],n:[["s","o","Início",190,30],["a","r","Registrar produtos da compra",190,105],["d0","d","Produto disponível?",190,205],["u","r","Informar produto indisponível",440,205],["uf","o","Fim",440,290],["b","r","Calcular valor total",190,315],["c","r","Cliente seleciona o pagamento",190,395],["p","r","Processar pagamento",190,475],["d1","d","Pagamento aprovado?",190,575],["w","r","Informar pagamento recusado",440,575],["d2","d","Deseja tentar novamente?",440,680],["z","r","Escolher outra forma de pagamento",690,680],["f","r","Finalizar compra",190,690],["r","r","Emitir comprovante",190,765],["cn","r","Cancelar compra",440,785],["rm","r","Retirar produtos do registro",440,865],["e","o","Fim",190,945]],
+e:[["s","a"],["a","d0"],["d0","b","SIM"],["d0","u","NÃO"],["u","uf"],["b","c"],["c","p"],["p","d1"],["d1","f","SIM"],["d1","w","NÃO"],["w","d2"],["d2","z","SIM"],["z","p","",[[690,475]]],["d2","cn","NÃO"],["f","r"],["r","e"],["cn","rm"],["rm","e","",[[440,945]]]]};
+build(document.getElementById("f1"),G1,"g1");build(document.getElementById("f2"),G2,"g2");build(document.getElementById("f3"),G3,"g3");
+
+/* ===== Fluxo do simulador (unificado) ===== */
+var SIM={vb:[780,1050],n:[["s","o","Início",200,30],["p1","r","Informar produto, quantidade e preço",200,105],["d1","d","Há estoque suficiente?",200,200],["e1","r","Informar produto indisponível",460,200],["ef","o","Fim",460,290],["p2","r","Calcular valor total",200,300],["d2","d","Possui cupom de desconto?",200,395],["p3","r","Informar código do cupom",460,395],["d3","d","Cupom válido?",460,495],["p4","r","Aplicar desconto",460,590],["p5","r","Informar cupom inválido",680,495],["p6","r","Processar pagamento",200,650],["d4","d","Pagamento aprovado?",200,750],["p9","r","Informar pagamento recusado",460,750],["d5","d","Tentar novamente?",460,850],["p10","r","Escolher outra forma de pagamento",680,850],["cn","r","Cancelar compra",460,945],["fn","o","Fim",460,1010],["p7","r","Finalizar compra",200,850],["p8","r","Emitir comprovante",200,925],["fim","o","Fim",200,1010]],
+e:[["s","p1"],["p1","d1"],["d1","p2","SIM"],["d1","e1","NÃO"],["e1","ef"],["p2","d2"],["d2","p3","SIM"],["d2","p6","NÃO"],["p3","d3"],["d3","p4","SIM"],["d3","p5","NÃO"],["p4","p6","",[[460,638]]],["p5","p6","",[[680,650]]],["p6","d4"],["d4","p7","SIM"],["d4","p9","NÃO"],["p9","d5"],["d5","p10","SIM"],["p10","p6","",[[680,780],[620,780],[620,662]]],["d5","cn","NÃO"],["cn","fn"],["p7","p8"],["p8","fim"]]};
+var M1={s:"s",b:"p1",d1:"d1",x:"e1",c:"p2",g:"p6",d2:"d4",y:"p9",h:"p7",i:"p8",e:"fim"},
+M2={s:"s",b:"p1",c:"p2",d1:"d2",p3:"p3",d2:"d3",p4:"p4",p5:"p5",k:"k",pg:"p6",d3:"d4",q:"p10",f:"p7",r:"p8",e:"fim"},
+M3={s:"s",a:"p1",d0:"d1",u:"e1",uf:"ef",b:"p2",p:"p6",d1:"d4",w:"p9",d2:"d5",z:"p10",f:"p7",r:"p8",cn:"cn",e:"fim"};
+var GR=[SIM,G1,G2,G3],MP=[null,M1,M2,M3],box=document.getElementById("diag"),SG,MAP;
+function load(v){MAP=MP[v];SG=build(box,GR[v],"sim")}
+load(0);
+
+/* ===== Lógica do simulador ===== */
+var CUP={DESC10:.10,PROMO5:.05,MERCADO20:.20},END=["ef","fn","fim"],S=null;
+var $=function(i){return document.getElementById(i)};
+var money=function(n){return n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})};
+var LOCK=["nome","qtd","preco","estoque","cupom"];
+
+var ACT={
+ s:function(c){return["Compra iniciada. O sistema está pronto para registrar o produto."]},
+ p1:function(c){return["Produto registrado: "+c.nome+" — "+c.qtd+" un. × "+money(c.preco)+"."]},
+ d1:function(c){var ok=c.estoque>=c.qtd;return["Há estoque suficiente para a quantidade pedida?","Verificação do sistema: estoque de "+c.estoque+", pedido de "+c.qtd+" → "+(ok?"suficiente":"insuficiente")+".",ok]},
+ e1:function(c){return["Produto indisponível no estoque. O cliente é informado e a compra segue o caminho de exceção."]},
+ p2:function(c){c.sub=c.qtd*c.preco;c.desc=0;return["Valor total calculado: "+money(c.sub)+"."]},
+ d2:function(c){return["O cliente possui cupom de desconto?","Verificação do sistema: "+(c.cupom?"código informado no formulário ("+c.cupom+")":"nenhum código informado")+".",!!c.cupom]},
+ p3:function(c){return["Código do cupom informado: "+(c.cupom||"(vazio)")+"."]},
+ d3:function(c){var ok=!!CUP[c.cupom];return["O cupom é válido?","Verificação do sistema: "+(ok?"cupom reconhecido ("+CUP[c.cupom]*100+"% de desconto)":"código não reconhecido")+".",ok]},
+ p4:function(c){var r=CUP[c.cupom]||0;c.desc=c.sub*r;return[r?"Desconto de "+r*100+"% aplicado: −"+money(c.desc)+".":"Nenhum desconto foi aplicado, pois o código não é válido para o sistema."]},
+ p5:function(c){c.desc=0;return["Cupom inválido: o cliente é avisado e a compra segue sem desconto."]},
+ k:function(c){return["Valor com desconto calculado: "+money(c.sub-c.desc)+"."]},
+ p6:function(c){c.total=c.sub-c.desc;c.forma=$("forma").value;c.n++;return["Processando "+money(c.total)+" em "+c.forma+" (tentativa "+c.n+")."]},
+ d4:function(c){var r=$("result").value;return["O pagamento foi aprovado?","Resultado fictício selecionado: "+r+" ("+$("forma").value+").",r==="aprovado"]},
+ p9:function(c){return["Pagamento recusado: o cliente é informado."]},
+ d5:function(c){return["O cliente deseja tentar novamente?","Se SIM, altere a forma ou o resultado do pagamento no formulário antes de seguir."]},
+ p10:function(c){return["Escolha outra forma de pagamento (e, se quiser, o resultado fictício) no formulário e clique em Próximo passo."]},
+ cn:function(c){return["Compra cancelada pelo cliente."]},
+ fn:function(c){return["Fim: compra não realizada. Nenhum item foi cobrado."]},
+ p7:function(c){c.ok=true;var ne=c.estoque-c.qtd;return["Compra finalizada. Estoque de "+c.nome+" atualizado: "+c.estoque+" → "+(ne<0?0:ne)+"."]},
+ p8:function(c){return["Comprovante emitido."]},
+ fim:function(c){return[c.ok?"Fim: compra concluída com sucesso.":"Fim: compra não realizada. Nenhum item foi cobrado."]},
+ ef:function(c){return["Fim: compra não realizada por falta de estoque."]}
+};
+
+function receipt(c){return"COMPROVANTE\nProduto: "+c.nome+"\nQuantidade: "+c.qtd+" × "+money(c.preco)+"\nSubtotal: "+money(c.sub)+"\nDesconto"+(c.cupom&&c.desc?" ("+c.cupom+")":"")+": −"+money(c.desc)+"\nTOTAL PAGO: "+money(c.total)+"\nPagamento: "+c.forma+" ("+c.n+" tentativa"+(c.n>1?"s":"")+")"}
+
+function log(t){var li=document.createElement("li");li.textContent=t;$("log").appendChild(li);$("log").scrollTop=1e5}
+function paint(){
+ Object.keys(SG.N).forEach(function(id){var c=$("simn-"+id).classList;c.toggle("vis",!!S&&S.vis.has(id));c.toggle("cur",!!S&&S.cur===id)});
+ SG.E.forEach(function(e){var c=$("sime-"+e.k).classList;c.toggle("vis",!!S&&S.ev.has(e.k));c.toggle("cur",!!S&&S.last===e.k)});
+ if(S){var el=$("simn-"+S.cur).getBoundingClientRect(),b=box.getBoundingClientRect();
+  box.scrollBy({top:el.top-b.top-b.height/2+el.height/2,left:el.left-b.left-b.width/2+el.width/2,behavior:"smooth"})}}
+function show(){
+ var nd=SG.N[S.cur],m=S.msg,h='<p class="hint">Bloco atual: <b>'+nd.l+"</b></p><p>"+m[0]+"</p>";
+ if(nd.t==="d"){if(m[1])h+='<p class="hint">'+m[1]+"</p>";
+  h+='<button class="btn" data-a="s">SIM</button><button class="btn alt" data-a="n">NÃO</button>'}
+ else if(!SG.E.some(function(e){return e.f===S.cur})){h+=(S.c.ok?"<pre>"+receipt(S.c)+"</pre>":"")+'<button class="btn" data-a="r">Nova simulação</button>'}
+ else h+='<button class="btn" data-a="x">Próximo passo ▶</button>';
+ $("panel").innerHTML=h;
+ $("panel").querySelectorAll("button").forEach(function(b){b.onclick=function(){var a=b.getAttribute("data-a");if(a==="r")reset();else go(a)}})}
+function rd(c){var pre=c.sub===undefined;
+ if(pre){var q=parseInt($("qtd").value,10),p=parseFloat($("preco").value),e=parseInt($("estoque").value,10);if(q>=1)c.qtd=q;if(p>=0)c.preco=p;if(e>=0)c.estoque=e;c.nome=$("nome").value.trim()||c.nome}
+ if(c.total===undefined)c.cupom=$("cupom").value.trim().toUpperCase();
+ ["nome","qtd","preco","estoque"].forEach(function(i){$(i).disabled=!pre});$("cupom").disabled=c.total!==undefined}
+function enter(id){S.cur=id;rd(S.c);var k=MAP?MAP[id]:id;S.msg=(ACT[k]||function(){return[SG.N[id].l+"."]})(S.c);if(SG.N[id].t!=="d")log(S.msg[0]);paint();show()}
+function go(ans){
+ var ed=SG.E.filter(function(e){return e.f===S.cur&&(!e.a||e.a===ans)})[0];if(!ed)return;
+ if(SG.N[S.cur].t==="d"){var exp=S.msg[2];
+  log("Decisão: "+S.msg[0]+" → "+(ans==="s"?"SIM":"NÃO"));
+  if(exp!==undefined&&exp!==(ans==="s"))log("⚠ A resposta difere da verificação do sistema; o simulador segue o caminho escolhido.")}
+ S.vis.add(S.cur);S.ev.add(ed.k);S.last=ed.k;enter(ed.t)}
+function reset(){S=null;$("log").innerHTML="";$("err").textContent="";LOCK.forEach(function(i){$(i).disabled=false});
+ $("start").disabled=false;paint();$("panel").innerHTML="<p>Preencha os dados e clique em <b>Iniciar compra</b>.</p>"}
+$("start").onclick=function(){
+ var c={nome:$("nome").value.trim(),qtd:parseInt($("qtd").value,10),preco:parseFloat($("preco").value),estoque:parseInt($("estoque").value,10),cupom:$("cupom").value.trim().toUpperCase(),n:0};
+ var er=!c.nome?"Informe o nome do produto.":!(c.qtd>=1)?"A quantidade deve ser pelo menos 1.":!(c.preco>=0)?"Informe um preço unitário válido.":!(c.estoque>=0)?"Informe uma quantidade de estoque válida.":"";
+ $("err").textContent=er;if(er)return;
+ reset();S={cur:null,vis:new Set(),ev:new Set(),last:null,c:c,msg:null};
+ $("start").disabled=true;enter("s")};
+$("reset").onclick=reset;
+$("flowsel").onchange=function(){load(+this.value);reset()};
+function runFlow(v){$("flowsel").value=v;load(v);reset();$("simulador").scrollIntoView({behavior:"smooth"})}
+document.querySelectorAll("[data-run]").forEach(function(b){b.onclick=function(){runFlow(+b.getAttribute("data-run"))}});
+
+/* ===== Expandir fluxograma ===== */
+var MZ=1,MB=0,MS=null;
+function zoom(z){MZ=z<.4?.4:z>3?3:z;MS.style.width=MB*MZ+"px"}
+function fit(){var b=$("mbody"),vb=MS.viewBox.baseVal;MB=Math.min(b.clientWidth-24,(b.clientHeight-24)*vb.width/vb.height);zoom(1)}
+function closeFlow(){$("modal").classList.remove("on")}
+function openFlow(n){var T=["Fluxo principal","Fluxo alternativo","Fluxo de exceção"];
+ MS=$("f"+n).querySelector("svg").cloneNode(true);MS.style.minWidth="0";
+ $("mtitle").textContent=n+". "+T[n-1];$("mbody").innerHTML="";$("mbody").appendChild(MS);
+ $("modal").classList.add("on");fit();$("mrun").onclick=function(){closeFlow();runFlow(n)}}
+document.querySelectorAll("[data-x]").forEach(function(b){b.onclick=function(){openFlow(+b.getAttribute("data-x"))}});
+$("mzin").onclick=function(){zoom(MZ*1.25)};$("mzout").onclick=function(){zoom(MZ/1.25)};$("mfit").onclick=fit;$("mclose").onclick=closeFlow;
+$("modal").onclick=function(e){if(e.target===$("modal"))closeFlow()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeFlow()});
+</script>
+</body>
+</html>
