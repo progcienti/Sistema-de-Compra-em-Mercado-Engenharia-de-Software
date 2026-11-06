@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sistema de Compra em Mercado — Engenharia de Software</title>
 <style>
-:root{--bg:#f3f7fe;--card:#fff;--ink:#0b2545;--mut:#4a6285;--pri:#1257c4;--pri2:#0a3d91;--soft:#e3eeff;--line:#c9daf5;--vis:#cfe2ff;--visb:#1257c4;--cur:#ffb020;--ok:#0f8a5f;--bad:#c62f3d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#07142b;--card:#0e2247;--ink:#e8f1ff;--mut:#9db6dc;--pri:#5b9bff;--pri2:#8db8ff;--soft:#14305f;--line:#264a85;--vis:#1b4a9a;--visb:#5b9bff;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#07142b;--card:#0e2247;--ink:#e8f1ff;--mut:#9db6dc;--pri:#5b9bff;--pri2:#8db8ff;--soft:#14305f;--line:#264a85;--vis:#1b4a9a;--visb:#5b9bff;color-scheme:dark}
+:root{--bg:#ffffff;--card:#ffffff;--soft:#ffffff;--ink:#0a1a33;--mut:#3b4f6e;--pri:#0b4fd1;--pri2:#062f7a;--line:#9db8e8;--vis:#bcd6ff;--visb:#0b4fd1;--cur:#ffb020;--ok:#0f8a5f;--bad:#c62f3d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 *,*:before,*:after{box-sizing:inherit}
 html{scroll-behavior:smooth;scroll-padding-top:calc(70px + env(safe-area-inset-top,0px));height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;min-height:100%}
@@ -139,6 +137,17 @@ footer{text-align:center;padding:40px 20px;color:var(--mut);font-size:14px}
   margin-top: auto;
 }
 
+
+/* destaque sobre fundo branco */
+.card,.symbols-section,.panel,.diag,.flowwrap{box-shadow:0 2px 12px rgba(6,47,122,.14)}
+.card,.symbols-section,.diag,.flowwrap{border:2px solid var(--line)}
+.card.top{border-top:6px solid var(--pri)}
+.av{background:var(--pri);color:#fff}
+.symbol-drawing{background:#fff;border:2px solid var(--line)}
+.symbol-card .symbol-example{background:#eef4ff;border-left:4px solid var(--pri)}
+.panel{background:#fff;border:2px solid var(--line);border-left:8px solid var(--cur)}
+input,select{border:2px solid var(--line)}
+pre{background:#f4f8ff}
 </style>
 </head>
 <body>
